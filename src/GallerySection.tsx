@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import foto1 from "./assets/gallery/foto1.jpg";
-import foto2 from "./assets/gallery/foto2.jpg";
-import foto3 from "./assets/gallery/foto3.jpg";
-import foto4 from "./assets/gallery/foto4.jpg";
 
-const images = [foto1, foto2, foto3, foto4];
+const images = [
+  "public/gallery/foto1.jpg",
+  "public/gallery/foto2.jpg",
+  "public/gallery/foto3.jpg",
+  "public/gallery/foto4.jpg",
+];
 
 export default function GallerySection() {
   const [idx, setIdx] = useState(0);
