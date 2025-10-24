@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+img {
+  content-visibility: visible !important;
+}
+

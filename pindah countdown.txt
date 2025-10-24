@@ -1,0 +1,678 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Calendar, Clock, MapPin, Music, Pause, Play, Send, Heart, Copy, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// =============================
+// TYPE & DATA
+// =============================
+type GuestbookEntry = {
+  name: string;
+  message: string;
+  ts: string; // ISO format
+};
+
+const COUPLE = { groom: "Galih", bride: "Dian" };
+const EVENT_START_ISO = "2025-12-04T09:00:00+07:00";
+const LOCATION_NAME = "Rumah mempelai wanita";
+const MAPS_LINK = "https://www.google.com/maps/search/?api=1&query=Rumah+mempelai+wanita";
+const WA_NUMBER = "628993791455";
+
+const STOCK_GALLERY = [
+  "https://www.paperlesspost.com/blog/wp-content/uploads/050823_Blog_Wedding_BestWeddingInvitationWebsites_13.png",
+  "https://static.basicinvite.com/media/bi/36665/in-alignment-wedding-website-up-l.jpg?q=1676567716",
+  "https://onefabday.com/wp-content/uploads/2018/08/The-best-wedding-website-builders-Joy.com-With-Joy-wedding-website-builder-1.jpg",
+  "https://i.etsystatic.com/5817654/r/il/febda3/5016333387/il_fullxfull.5016333387_bmq0.jpg",
+];
+
+const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+const GIFTS = [
+  { bank: "BCA", name: "Galih", number: "1234567890" },
+  { bank: "Mandiri", name: "Dian", number: "9876543210" },
+];
+const GIFT_ADDRESS = "Jl. Contoh Alamat Pengantin No. 123, Jakarta Selatan";
+const QRIS_IMAGE_URL = "https://www.vintageprints.co.uk/image/catalog/Product%20Photos/Invite%20Only/Vintage%20Blooms/VB11/VB11%20Vintage%20Bloom%20Invite%20Only%20Sq%2011%20Closer.jpg";
+
+const LOVE_STORY = [
+  { year: "2018", title: "Pertemuan Pertama", desc: "Bertemu di kampus dan mulai berteman." },
+  { year: "2020", title: "Resmi Berpacaran", desc: "Memulai perjalanan bersama di tengah masa sulit pandemi." },
+  { year: "2023", title: "Lamaran", desc: "Resmi bertunangan disaksikan keluarga terdekat." },
+  { year: "2025", title: "Menuju Pelaminan", desc: "Siap mengikat janji suci pada 4 Desember 2025." },
+];
+
+// =============================
+// MAIN COMPONENT
+// =============================
+export default function WeddingInvitation() {
+  const targetDate = useMemo(() => new Date(EVENT_START_ISO), []);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashStep, setSplashStep] = useState<0 | 1 | 2>(0);
+  const [heroIdx, setHeroIdx] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+  const [guestbook, setGuestbook] = useState<GuestbookEntry[]>(() => {
+    const raw = (typeof window !== 'undefined') ? localStorage.getItem("guestbook") : null;
+    return raw ? JSON.parse(raw) : [];
+  });
+  const [rsvp, setRsvp] = useState({ name: "", pax: 1, status: "Hadir" });
+  const [wish, setWish] = useState({ name: "", message: "" });
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+  
+
+// 🚫 Blok auto scroll dari hash URL
+useEffect(() => {
+  // Hapus hash kalau ada saat load
+  if (window.location.hash) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+
+  // Cegah hash scroll kalau user klik link dengan #
+  const handleHashChange = () => {
+    if (window.location.hash) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  };
+  window.addEventListener("hashchange", handleHashChange);
+
+  // Matikan scroll restore browser
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+
+  
+
+  return () => {
+    window.removeEventListener("hashchange", handleHashChange);
+  };
+}, []);
+
+
+  // SPLASH TIMER
+  useEffect(() => {
+    const timers: number[] = [];
+    timers.push(window.setTimeout(() => setSplashStep(1), 2500));
+    timers.push(window.setTimeout(() => setSplashStep(2), 5500));
+    return () => timers.forEach((id) => clearTimeout(id));
+  }, []);
+
+  // HERO ROTATION
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFading(true);
+      const timeout = setTimeout(() => {
+        setHeroIdx((i) => (i + 1) % STOCK_GALLERY.length);
+        setIsFading(false);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }, 7500);
+    return () => clearInterval(interval);
+  }, []);
+
+
+
+  // GUESTBOOK SAVE
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("guestbook", JSON.stringify(guestbook));
+    }
+  }, [guestbook]);
+
+  function toggleMusic() {
+    const el = audioRef.current;
+    if (!el) return;
+    if (isPlaying) {
+      el.pause();
+      setIsPlaying(false);
+    } else {
+      el.play().then(() => setIsPlaying(true)).catch((err) => console.warn("⚠️ Gagal play audio:", err));
+    }
+  }
+
+  function saveICS() {
+    const start = new Date(EVENT_START_ISO);
+    const end = new Date(start.getTime() + 3 * 60 * 60 * 1000);
+    function fmt(d: Date) {
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return (
+        d.getUTCFullYear().toString() +
+        pad(d.getUTCMonth() + 1) +
+        pad(d.getUTCDate()) +
+        "T" +
+        pad(d.getUTCHours()) +
+        pad(d.getUTCMinutes()) +
+        pad(d.getUTCSeconds()) +
+        "Z"
+      );
+    }
+    const ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wedding//ID
+BEGIN:VEVENT
+UID:${Date.now()}@Galih-Dian
+DTSTAMP:${fmt(new Date())}
+DTSTART:${fmt(start)}
+DTEND:${fmt(end)}
+SUMMARY:Pernikahan ${COUPLE.groom} & ${COUPLE.bride}
+LOCATION:${LOCATION_NAME}
+DESCRIPTION:Undangan pernikahan ${COUPLE.groom} & ${COUPLE.bride}
+END:VEVENT
+END:VCALENDAR`;
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `SaveTheDate-${COUPLE.groom}-${COUPLE.bride}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function openWA() {
+    const text = `Halo ${COUPLE.groom} & ${COUPLE.bride}%0A%0A` +
+      `Nama: ${encodeURIComponent(rsvp.name)}%0A` +
+      `Kehadiran: ${encodeURIComponent(rsvp.status)}%0A` +
+      `Jumlah Tamu: ${encodeURIComponent(String(rsvp.pax))}%0A` +
+      `Sampai jumpa di acara!`;
+    window.open(`https://wa.me/${WA_NUMBER}?text=${text}`, "_blank");
+  }
+
+  function addWish(e: React.FormEvent) {
+    e.preventDefault();
+    if (!wish.name || !wish.message) return;
+    const item: GuestbookEntry = { ...wish, ts: new Date().toISOString() };
+    setGuestbook((prev) => [item, ...prev]);
+    setWish({ name: "", message: "" });
+  }
+
+  async function copyNumber(i: number) {
+    const num = GIFTS[i].number;
+    try {
+      await navigator.clipboard.writeText(num);
+      setCopiedIdx(i);
+      setTimeout(() => setCopiedIdx(null), 1500);
+    } catch { }
+  }
+
+  const Section = ({ id, children, className = "" }: any) => (
+    <section id={id} className={`max-w-5xl mx-auto px-4 sm:px-6 py-14 ${className}`}>{children}</section>
+  );
+
+    // =======================================
+  // HERO SECTION pakai useMemo (ANTI FLICKER)
+  // =======================================
+  const heroSection = useMemo(() => (
+    <header className="relative h-[90vh] w-full overflow-hidden">
+      {STOCK_GALLERY.map((img, i) => (
+        <motion.div
+          key={`hero-${i}-${img}`}
+          initial={false} // ⛔️ Biar nggak reset animasi saat state global berubah
+          animate={{ opacity: i === heroIdx ? 1 : 0 }}
+          transition={{ duration: 0.7 }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${img})` }}
+        />
+      ))}
+      <motion.div
+        className="absolute inset-0 bg-black"
+        initial={false}
+        animate={{ opacity: isFading ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      />
+      <div className="absolute inset-0 bg-neutral-900/50" />
+
+      <nav className="absolute top-4 left-0 right-0 flex items-center justify-between max-w-5xl mx-auto px-4">
+        <div className="text-white/90 tracking-wider uppercase text-xs">
+          Undangan Pernikahan
+        </div>
+      </nav>
+
+      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4">
+        <p className="text-sm tracking-[0.3em] uppercase text-white/80">Dengan Penuh Cinta</p>
+        <h1 className="mt-4 text-5xl sm:text-6xl font-serif">{COUPLE.groom} & {COUPLE.bride}</h1>
+        <p className="mt-4 inline-flex items-center gap-2 text-white/90">
+          <Calendar className="w-5 h-5" /> 4 Desember 2025
+        </p>
+
+        {/* Countdown TETAP DI SINI, tapi hero tidak rerender */}
+        <Countdown targetDate={targetDate} />
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => document.getElementById("detail")?.scrollIntoView({ behavior: "smooth" })}
+            className="rounded-2xl bg-white text-neutral-900 px-6 py-3 shadow hover:shadow-md transition"
+          >
+            Lihat Detail
+          </button>
+
+          <button
+            type="button"
+            onClick={saveICS}
+            className="rounded-2xl bg-amber-400 text-neutral-900 px-6 py-3 shadow hover:shadow-md transition inline-flex items-center gap-2"
+          >
+            <Calendar className="w-4 h-4" /> Simpan ke Kalender
+          </button>
+        </div>
+      </div>
+    </header>
+  ), [heroIdx, isFading]);
+
+  useEffect(() => {
+  const stopGlobalClick = (e: MouseEvent) => {
+    // hanya intercept klik dari area kosong, bukan tombol/link/form
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("input") ||
+      target.closest("textarea") ||
+      target.closest("select")
+    ) {
+      return; // biarkan lewat
+    }
+
+    // intercept klik liar
+    e.stopPropagation();
+    if (typeof (e as any).stopImmediatePropagation === "function") {
+      (e as any).stopImmediatePropagation();
+    }
+  };
+
+  document.addEventListener("click", stopGlobalClick, true);
+  window.addEventListener("click", stopGlobalClick, true);
+
+  return () => {
+    document.removeEventListener("click", stopGlobalClick, true);
+    window.removeEventListener("click", stopGlobalClick, true);
+  };
+}, []);
+
+
+  return (
+  <div
+    className="min-h-screen bg-neutral-50 text-neutral-800">
+
+      {/* SPLASH */}
+      {showSplash ? (
+        <motion.div className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-black text-white text-center">
+          <AnimatePresence mode="wait">
+            {splashStep === 0 && (
+              <motion.div key="0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}>
+                THE WEDDING OF
+              </motion.div>
+            )}
+            {splashStep === 1 && (
+              <motion.div key="1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }} className="text-4xl sm:text-5xl font-serif">
+                {COUPLE.groom} & {COUPLE.bride}
+              </motion.div>
+            )}
+            {splashStep === 2 && (
+              <motion.button
+                key="2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-amber-400 text-neutral-900 px-6 py-3 shadow hover:shadow-md transition"
+                onClick={() => {
+                  const el = audioRef.current;
+                  if (el) el.play().then(() => setIsPlaying(true)).catch(()=>{});
+                  setShowSplash(false);
+                }}
+              >
+                Open Invitation
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      ) : (
+        <>
+          {/* Tombol Musik */}
+          <div className="fixed top-4 right-4 z-1000">
+            <button
+              type="button"
+              onClick={toggleMusic}
+              className="inline-flex items-center gap-2 rounded-2xl bg-black/50 backdrop-blur px-4 py-2 text-white shadow hover:bg-black/30 transition"
+            >
+              <Music className="w-4 h-4" />
+              {isPlaying ? (
+                <>
+                  <Pause className="w-4 h-4" />
+                  <span>Pause</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  <span>Play</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <audio ref={audioRef} src={MUSIC_URL} loop preload="auto" playsInline />
+
+          {/* HERO */}
+{heroSection}
+
+          {/* NAMA */}
+          <Section className="text-center">
+            <h2 className="text-3xl font-serif">{COUPLE.groom} & {COUPLE.bride}</h2>
+            <p className="mt-2 text-neutral-600">Dengan penuh cinta kami mengundang Anda.</p>
+          </Section>
+
+          {/* DETAIL */}
+          <Section id="detail">
+            <div className="text-center">
+              <h2 className="text-3xl font-serif">Detail Acara</h2>
+              <p className="mt-2 text-neutral-600">Mohon do'a restu atas pernikahan kami.</p>
+            </div>
+            <div className="mt-8 grid sm:grid-cols-3 gap-5">
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 text-neutral-700"><Clock className="w-5 h-5" /><span>Akad</span></div>
+                <div className="mt-2 text-lg font-medium">Kamis, 4 Desember 2025 — 09:00 WIB</div>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 text-neutral-700"><Clock className="w-5 h-5" /><span>Resepsi</span></div>
+                <div className="mt-2 text-lg font-medium">Kamis, 4 Desember 2025 — 11:00–14:00 WIB</div>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 text-neutral-700"><MapPin className="w-5 h-5" /><span>Lokasi</span></div>
+                <div className="mt-2 text-lg font-medium">{LOCATION_NAME}</div>
+                <button
+  type="button"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(MAPS_LINK, "_blank");
+  }}
+  className="mt-3 inline-block rounded-xl bg-neutral-900 text-white px-4 py-2 hover:bg-neutral-800 transition"
+>
+  Buka Google Maps
+</button>
+
+              </div>
+            </div>
+          </Section>
+
+          {/* LOVE STORY */}
+          <Section id="love-story">
+            <div className="text-center">
+              <h2 className="text-3xl font-serif">Love Story</h2>
+              <p className="mt-2 text-neutral-600">Perjalanan singkat kisah cinta kami.</p>
+            </div>
+            <div className="mt-8 relative">
+              <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-0.5 bg-neutral-200" />
+              <div className="space-y-8">
+                {LOVE_STORY.map((item, i) => (
+                  <div key={i} className={`grid sm:grid-cols-2 gap-6 items-start`}>
+                    <div className={`sm:text-right ${i % 2 ? 'order-0' : 'sm:order-first'}`}>
+                      <div className="text-2xl font-serif">{item.title}</div>
+                      <div className="text-sm text-neutral-500 mt-1">{item.year}</div>
+                      <p className="mt-2 text-neutral-700">{item.desc}</p>
+                    </div>
+                    <div className="sm:text-left">
+                      <div className="h-3 w-3 rounded-full bg-amber-400 mx-auto sm:mx-0 sm:ml-auto mt-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Section>
+
+          {/* GALLERY */}
+          <Section id="galeri" className="text-center">
+            <h2 className="text-3xl font-serif">Galeri Prewed</h2>
+            <p className="mt-2 text-neutral-600">Placeholder foto — ganti dengan foto kalian nanti.</p>
+            <Carousel images={STOCK_GALLERY} />
+          </Section>
+
+          
+
+          {/* GIFT */}
+          <Section id="gift">
+            <div className="text-center">
+              <h2 className="text-3xl font-serif">Wedding Gift</h2>
+              <p className="mt-2 text-neutral-600">
+                Bagi keluarga/teman yang berhalangan hadir, dapat berbagi kebahagiaan melalui hadiah di bawah ini.
+              </p>
+            </div>
+            <div className="mt-8 grid sm:grid-cols-2 gap-6">
+              <div className="rounded-2xl bg-white p-6 shadow-sm text-center">
+                <div className="font-medium">QRIS</div>
+                <img src={QRIS_IMAGE_URL} alt="QRIS" className="mt-3 mx-auto w-64 h-64 object-cover rounded-xl border" />
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <div className="font-medium mb-3">Rekening Bank</div>
+                <div className="space-y-3">
+                  {GIFTS.map((g, i) => (
+                    <div key={i} className="rounded-xl border p-4 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-medium">{g.bank}</div>
+                        <div className="text-sm text-neutral-600">a/n {g.name}</div>
+                        <div className="mt-1 text-lg tracking-wider">{g.number}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyNumber(i)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 text-white px-3 py-2 hover:bg-neutral-800"
+                      >
+                        {copiedIdx === i ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copiedIdx === i ? "Tersalin" : "Salin"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 p-4 rounded-xl border text-sm text-neutral-700 bg-neutral-50">
+                  <p className="font-medium mb-1">Alamat Pengiriman Barang:</p>
+                  <p>{GIFT_ADDRESS}</p>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* RSVP */}
+          <Section id="rsvp">
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <h3 className="text-2xl font-serif">Konfirmasi Kehadiran</h3>
+              <div className="mt-4 grid sm:grid-cols-4 gap-3">
+                <input
+  id="rsvp-name"
+  name="rsvp-name"
+  placeholder="Nama lengkap"
+  value={rsvp.name}
+  onChange={(e) => setRsvp((v) => ({ ...v, name: e.target.value }))}
+  className="rounded-xl border px-4 py-3 focus:ring-2 focus:ring-amber-400 col-span-2"
+/>
+<select
+  id="rsvp-status"
+  name="rsvp-status"
+  value={rsvp.status}
+  onChange={(e) => setRsvp((v) => ({ ...v, status: e.target.value }))}
+  className="rounded-xl border px-4 py-3 focus:ring-2 focus:ring-amber-400"
+>
+  <option>Hadir</option>
+  <option>Tidak Hadir</option>
+</select>
+<input
+  id="rsvp-pax"
+  name="rsvp-pax"
+  type="number"
+  min={1}
+  value={rsvp.pax}
+  onChange={(e) => setRsvp((v) => ({ ...v, pax: Number(e.target.value) }))}
+  className="rounded-xl border px-4 py-3 focus:ring-2 focus:ring-amber-400"
+/>
+
+              </div>
+              <button
+                type="button"
+                onClick={openWA}
+                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 text-white px-5 py-3 hover:bg-emerald-700"
+              >
+                <Send className="w-4 h-4" /> Kirim via WhatsApp
+              </button>
+            </div>
+          </Section>
+
+          {/* MAPS */}
+<Section id="maps" className="pt-0">
+  <div className="text-center">
+    <h2 className="text-2xl font-serif">Peta Lokasi Resepsi</h2>
+    <p className="mt-2 text-neutral-600">
+      Klik gambar peta di bawah untuk membuka Google Maps 📍
+    </p>
+  </div>
+
+  <div className="mt-6 rounded-2xl overflow-hidden shadow cursor-pointer">
+    <a
+      href={MAPS_LINK}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img
+        src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVnJHxDMvftG6v7SNxpLyf01KkGcnl2CpqjQ&s`}
+        alt="Lokasi Resepsi"
+        className="w-full h-[420px] object-cover transition hover:opacity-90"
+        loading="lazy"
+      />
+    </a>
+  </div>
+</Section>
+
+
+
+          {/* GUESTBOOK */}
+          <Section id="ucapan">
+            <div className="grid sm:grid-cols-2 gap-6">
+              <form onSubmit={addWish} className="rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-2xl font-serif">Ucapan & Doa</h3>
+                <input
+  id="wish-name"
+  name="wish-name"
+  className="mt-4 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-amber-400"
+  placeholder="Nama"
+  value={wish.name}
+  onChange={(e) => setWish((v) => ({ ...v, name: e.target.value }))}
+/>
+<textarea
+  id="wish-message"
+  name="wish-message"
+  className="mt-3 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-amber-400"
+  placeholder="Tulis ucapan terbaikmu..."
+  value={wish.message}
+  onChange={(e) => setWish((v) => ({ ...v, message: e.target.value }))}
+/>
+
+                <button
+                  type="submit"
+                  className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-neutral-900 text-white px-5 py-3 hover:bg-neutral-800"
+                >
+                  <Heart className="w-4 h-4" /> Kirim Ucapan
+                </button>
+              </form>
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-2xl font-serif">Ucapan Masuk</h3>
+                <div className="mt-4 space-y-4 max-h-80 overflow-auto pr-2">
+                  {guestbook.length === 0 && (
+                    <p className="text-neutral-500">Belum ada ucapan. Jadilah yang pertama! ✨</p>
+                  )}
+                  {guestbook.map((g, i) => (
+                    <div key={i} className="rounded-xl border p-4">
+                      <div className="font-medium">{g.name}</div>
+                      <div className="mt-1 text-neutral-700">{g.message}</div>
+                      <div className="mt-1 text-xs text-neutral-500">
+                        {new Date(g.ts).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* FOOTER */}
+          <footer className="bg-neutral-900 text-white">
+            <Section className="text-center py-10">
+              <div className="text-sm uppercase tracking-widest text-white/70">Dengan penuh cinta</div>
+              <div className="mt-2 text-3xl font-serif">{COUPLE.groom} & {COUPLE.bride}</div>
+              <div className="mt-4 text-white/70">Terima kasih atas doa dan kehadiran Anda.</div>
+            </Section>
+          </footer>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ================= Carousel =================
+function Carousel({ images }: { images: string[] }) {
+  const [idx, setIdx] = useState(0);
+  function prev() { setIdx((i) => (i - 1 + images.length) % images.length); }
+  function next() { setIdx((i) => (i + 1) % images.length); }
+
+  return (
+    <div className="mt-6">
+      <div className="relative overflow-hidden rounded-2xl shadow">
+        <img src={images[idx]} alt="Galeri" className="w-full aspect-video object-cover" />
+        <button type="button" onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 px-3 py-2 hover:bg-white">‹</button>
+        <button type="button" onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 px-3 py-2 hover:bg-white">›</button>
+      </div>
+      <div className="mt-3 flex justify-center gap-2">
+        {images.map((img, i) => (
+          <button
+            key={`dot-${i}-${img}`}
+            type="button"
+            onClick={() => setIdx(i)}
+            className={`h-2 w-2 rounded-full ${i === idx ? "bg-neutral-900" : "bg-neutral-300"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Countdown({ targetDate }: { targetDate: Date }) {
+  const [now, setNow] = useState(() => new Date());
+
+useEffect(() => {
+  const handler = (e: MouseEvent) => {
+    // Deteksi klik global yang gak punya target spesifik
+    if (e.target === document.body || e.target === document.documentElement) {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log("⚠️ Global click intercepted & blocked");
+    }
+  };
+
+
+  return () => {
+    document.removeEventListener("click", handler, true);
+  };
+}, []);
+
+  
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const diff = Math.max(0, targetDate.getTime() - now.getTime());
+  const dd = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hh = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const mm = Math.floor((diff / (1000 * 60)) % 60);
+  const ss = Math.floor((diff / 1000) % 60);
+
+  return (
+    <div className="mt-8 grid grid-cols-4 gap-3">
+      {[{ label: 'Hari', val: dd }, { label: 'Jam', val: hh }, { label: 'Menit', val: mm }, { label: 'Detik', val: ss }].map((x, idx) => (
+        <div key={idx} className="rounded-2xl bg-white/10 backdrop-blur px-5 py-4">
+          <div className="text-3xl font-semibold">{String(x.val).padStart(2, "0")}</div>
+          <div className="text-xs tracking-wider uppercase text-white/80">{x.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
