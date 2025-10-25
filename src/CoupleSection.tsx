@@ -29,7 +29,7 @@ export default function CoupleSection({
         <div className="relative flex items-center justify-center">
           <div className="hidden sm:block h-16 w-px bg-neutral-300" />
           <div className="sm:hidden w-16 h-px bg-neutral-300" />
-          <div className="absolute flex items-center justify-center bg-neutral-50 rounded-full p-2 shadow">
+          <div className="absolute flex items-center justify-center bg-neutral-100 rounded-full p-2 shadow">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

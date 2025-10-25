@@ -30,11 +30,11 @@ export default function GiftSection() {
       </div>
 
       <div className="mt-8 grid sm:grid-cols-2 gap-6">
-        <div className="rounded-2xl bg-white p-6 shadow-sm text-center">
+        <div className="rounded-2xl bg-neutral-100 p-6 shadow-sm text-center">
           <div className="font-medium">QRIS</div>
           <img src={QRIS_IMAGE_URL} alt="QRIS" className="mt-3 mx-auto w-64 h-64 object-cover rounded-xl border" />
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-2xl bg-neutral-100 p-6 shadow-sm">
           <div className="font-medium mb-3">Rekening Bank</div>
           <div className="space-y-3">
             {GIFTS.map((g, i) => (
@@ -54,7 +54,7 @@ export default function GiftSection() {
               </div>
             ))}
           </div>
-          <div className="mt-6 p-4 rounded-xl border text-sm text-neutral-700 bg-neutral-50">
+          <div className="mt-6 p-4 rounded-xl border text-sm text-neutral-700 bg-neutral-100">
             <p className="font-medium mb-1">Alamat Pengiriman Barang:</p>
             <p>{GIFT_ADDRESS}</p>
           </div>

@@ -213,7 +213,7 @@ END:VCALENDAR`;
 
 {/* 🌿 Scroll Down Indicator — Fade In Up */}
 <div
-  className="absolute bottom-16 left-1/2 -translate-x-1/2 cursor-pointer opacity-100 animate-fadeInUp z-30"
+  className="absolute bottom-25 left-1/2 -translate-x-1/2 cursor-pointer opacity-100 animate-fadeInUp z-30"
   onClick={() => smoothScrollTo(window.innerHeight, 1200)} // ⏳ atur speed disini (ms)
 >
   <div className="backdrop-blur-sm bg-white/10 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg border border-white/20 hover:bg-white/20 transition">
@@ -235,7 +235,7 @@ END:VCALENDAR`;
         className="relative text-neutral-800 z-20 rounded-t-4xl -mt-8 pt-10"
         style={{
           backgroundImage: `
-            linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.5)),
+            linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.5)),
             url('/textures/paper-texture3.jpg')
           `,
           backgroundRepeat: "no-repeat",

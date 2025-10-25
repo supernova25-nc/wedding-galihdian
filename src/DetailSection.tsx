@@ -18,7 +18,7 @@ export default function DetailSection({ mapsLink }: { mapsLink: string }) {
 
 function DetailBox({ icon, title, text, mapsLink }: any) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm text-center">
+    <div className="rounded-2xl bg-neutral-100 p-6 shadow-sm text-center">
       <div className="flex items-center justify-center gap-2 text-neutral-700">{icon}<span>{title}</span></div>
       <div className="mt-2 text-lg font-medium">{text}</div>
       {mapsLink && (
