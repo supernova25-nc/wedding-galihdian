@@ -171,7 +171,20 @@ END:VCALENDAR`;
       {/* =============================== */}
       {/* 📄 Section Putih Polos */}
       {/* =============================== */}
-      <div className="bg-neutral-50 text-neutral-800 relative z-20 rounded-t-4xl -mt-8 pt-10">
+      <div
+  className="relative text-neutral-800 z-20 rounded-t-4xl -mt-8 pt-10"
+  style={{
+    // layer-1: gradient lembut (atas–bawah)
+    // layer-2: pattern bunga
+    backgroundImage: `
+      linear-gradient(to bottom, rgba(255,255,255,0.97), rgba(255,255,255,0.98)),
+      url('/patterns/bunga.svg')
+    `,
+    backgroundRepeat: 'repeat',
+    backgroundSize: '140px',         // ubah 100–180px sesuai selera
+    backgroundPosition: 'center top', // rapikan posisi
+  }}
+>
         <CoupleSection
   groomFull={COUPLE.groomFull}
   brideFull={COUPLE.brideFull}

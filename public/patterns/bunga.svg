@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <defs>
+    <g id="f">
+      <circle cx="6" cy="6" r="2.5" fill="#d4d4d4"></circle>
+      <circle cx="0" cy="12" r="1.5" fill="#e5e5e5"></circle>
+      <circle cx="12" cy="0" r="1.5" fill="#e5e5e5"></circle>
+    </g>
+  </defs>
+  <rect width="120" height="120" fill="none"></rect>
+  <!-- bunga kecil -->
+  <g opacity="0.35">
+    <g transform="translate(20,20)">
+      <circle cx="8" cy="8" r="6" fill="#eab308"></circle>
+      <circle cx="8" cy="8" r="2.5" fill="#fde68a"></circle>
+      <path d="M8 0 L10 4 L6 4 Z" fill="#f59e0b" opacity="0.6"></path>
+      <path d="M16 8 L12 10 L12 6 Z" fill="#f59e0b" opacity="0.6"></path>
+      <path d="M8 16 L10 12 L6 12 Z" fill="#f59e0b" opacity="0.6"></path>
+      <path d="M0 8 L4 10 L4 6 Z" fill="#f59e0b" opacity="0.6"></path>
+    </g>
+    <use href="#f" x="60" y="10"></use>
+    <use href="#f" x="10" y="70"></use>
+    <use href="#f" x="80" y="80"></use>
+  </g>
+</svg>
