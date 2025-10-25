@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const bgImages = [
-  "public/gallery/foto1.jpg",
-  "public/gallery/foto2.jpg",
-  "public/gallery/foto3.jpg",
-  "public/gallery/foto4.jpg",
+  "/gallery/foto1.jpg",
+  "/gallery/foto2.jpg",
+  "/gallery/foto3.jpg",
+  "/gallery/foto4.jpg",
 ];
 
 export default function HeroBackground() {

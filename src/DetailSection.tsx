@@ -8,8 +8,8 @@ export default function DetailSection({ mapsLink }: { mapsLink: string }) {
         <p className="mt-2 text-neutral-600">Mohon doa restu atas pernikahan kami.</p>
       </div>
       <div className="mt-8 grid sm:grid-cols-3 gap-5">
-        <DetailBox icon={<Clock className="w-5 h-5" />} title="Akad" text="Kamis, 4 Desember 2025 — 09:00 WIB" />
-        <DetailBox icon={<Clock className="w-5 h-5" />} title="Resepsi" text="Kamis, 4 Desember 2025 — 11:00–14:00 WIB" />
+        <DetailBox icon={<Clock className="w-5 h-5" />} title="Akad" text="Kamis, 4 Desember 2025 — 07:00 WIB" />
+        <DetailBox icon={<Clock className="w-5 h-5" />} title="Resepsi" text="Kamis, 4 Desember 2025 — 12:00 WIB – Selesai" />
         <DetailBox icon={<MapPin className="w-5 h-5" />} title="Lokasi" text="Rumah mempelai wanita" mapsLink={mapsLink} />
       </div>
     </section>
