@@ -13,6 +13,33 @@ import MapSection from "./MapSection";
 import GuestbookSection from "./GuestbookSection";
 import FooterSection from "./FooterSection";
 
+// 🌀 Smooth Scroll Function dengan kecepatan custom
+function smoothScrollTo(targetY: number, duration = 800) {
+  const startY = window.scrollY;
+  const distanceY = targetY - startY;
+  let startTime: number | null = null;
+
+  function animation(currentTime: number) {
+    if (startTime === null) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // easeInOutQuad ✨
+    const ease = progress < 0.5
+      ? 2 * progress * progress
+      : -1 + (4 - 2 * progress) * progress;
+
+    window.scrollTo(0, startY + distanceY * ease);
+
+    if (elapsed < duration) {
+      requestAnimationFrame(animation);
+    }
+  }
+
+  requestAnimationFrame(animation);
+}
+
+
 const COUPLE = {
   groom: "Galih",
   bride: "Dian",
@@ -116,6 +143,7 @@ END:VCALENDAR`;
     setTimeout(() => setShowSplash(false), 500);
   };
 
+
   return (
     <div className="min-h-screen text-neutral-800 relative overflow-x-hidden">
       {/* Hero Background */}
@@ -177,11 +205,29 @@ END:VCALENDAR`;
           <button
             type="button"
             onClick={saveICS}
-            className="rounded-2xl bg-amber-400 text-neutral-900 px-6 py-3 shadow hover:shadow-md transition inline-flex items-center gap-2"
+            className="rounded-2xl bg-amber-400 text-neutral-900 px-4 py-1 shadow hover:shadow-md transition inline-flex items-center gap-1"
           >
             <Calendar className="w-4 h-4" /> Simpan ke Kalender
           </button>
         </div>
+
+{/* 🌿 Scroll Down Indicator — Fade In Up */}
+<div
+  className="absolute bottom-16 left-1/2 -translate-x-1/2 cursor-pointer opacity-100 animate-fadeInUp z-30"
+  onClick={() => smoothScrollTo(window.innerHeight, 1200)} // ⏳ atur speed disini (ms)
+>
+  <div className="backdrop-blur-sm bg-white/10 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg border border-white/20 hover:bg-white/20 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+    <span className="text-white text-xs tracking-wide">Scroll Down</span>
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </div>
+</div>
+
+
       </header>
 
       {/* Content Section */}

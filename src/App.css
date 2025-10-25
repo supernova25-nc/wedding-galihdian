@@ -40,3 +40,18 @@
 .read-the-docs {
   color: #888;
 }
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 1.2s ease-out 1.5s forwards;
+}
