@@ -1,64 +1,118 @@
-import { Copy, Check } from "lucide-react";
 import { useState } from "react";
-
-const GIFTS = [
-  { bank: "BCA", name: "Galih", number: "1234567890" },
-  { bank: "Mandiri", name: "Dian", number: "9876543210" },
-];
-
-const QRIS_IMAGE_URL = "https://www.vintageprints.co.uk/image/catalog/Product%20Photos/Invite%20Only/Vintage%20Blooms/VB11/VB11%20Vintage%20Bloom%20Invite%20Only%20Sq%2011%20Closer.jpg";
-const GIFT_ADDRESS = "Jl. Contoh Alamat Pengantin No. 123, Jakarta Selatan";
+import { Copy, Gift, QrCode, Banknote } from "lucide-react";
 
 export default function GiftSection() {
-  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"qris" | "transfer" | "hadiah">("qris");
 
-  async function copyNumber(i: number) {
-    try {
-      await navigator.clipboard.writeText(GIFTS[i].number);
-      setCopiedIdx(i);
-      setTimeout(() => setCopiedIdx(null), 1500);
-    } catch {}
-  }
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Berhasil disalin!");
+  };
 
   return (
-    <section className="max-w-5xl mx-auto px-4 py-14">
-      <div className="text-center">
-        <h2 className="text-3xl font-serif">Wedding Gift</h2>
-        <p className="mt-2 text-neutral-600">
-          Bagi keluarga/teman yang berhalangan hadir, dapat berbagi kebahagiaan melalui hadiah di bawah ini.
-        </p>
-      </div>
+    <section className="max-w-2xl mx-auto px-4 py-14">
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-serif text-center mb-6">Wedding Gift</h2>
 
-      <div className="mt-8 grid sm:grid-cols-2 gap-6">
-        <div className="rounded-2xl bg-neutral-100 p-6 shadow-sm text-center">
-          <div className="font-medium">QRIS</div>
-          <img src={QRIS_IMAGE_URL} alt="QRIS" className="mt-3 mx-auto w-64 h-64 object-cover rounded-xl border" />
+        {/* 🪄 Tab Button */}
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab("qris")}
+            className={`flex flex-col items-center rounded-xl py-2 ${
+              activeTab === "qris" ? "bg-amber-400 text-white" : "bg-neutral-100"
+            }`}
+          >
+            <QrCode className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">QRIS</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("transfer")}
+            className={`flex flex-col items-center rounded-xl py-2 ${
+              activeTab === "transfer" ? "bg-amber-400 text-white" : "bg-neutral-100"
+            }`}
+          >
+            <Banknote className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Transfer</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("hadiah")}
+            className={`flex flex-col items-center rounded-xl py-2 ${
+              activeTab === "hadiah" ? "bg-amber-400 text-white" : "bg-neutral-100"
+            }`}
+          >
+            <Gift className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Hadiah</span>
+          </button>
         </div>
-        <div className="rounded-2xl bg-neutral-100 p-6 shadow-sm">
-          <div className="font-medium mb-3">Rekening Bank</div>
-          <div className="space-y-3">
-            {GIFTS.map((g, i) => (
-              <div key={i} className="rounded-xl border p-4 flex items-center justify-between gap-3">
-                <div>
-                  <div className="font-medium">{g.bank}</div>
-                  <div className="text-sm text-neutral-600">a/n {g.name}</div>
-                  <div className="mt-1 text-lg tracking-wider">{g.number}</div>
-                </div>
-                <button
-                  onClick={() => copyNumber(i)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 text-white px-3 py-2 hover:bg-neutral-800"
-                >
-                  {copiedIdx === i ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copiedIdx === i ? "Tersalin" : "Salin"}
-                </button>
+
+        {/* 📌 Konten Tiap Tab */}
+        {activeTab === "qris" && (
+          <div className="text-center space-y-3 animate-fadeIn">
+            <p className="text-neutral-600">Scan QRIS untuk memberikan hadiah</p>
+            <div className="border rounded-xl overflow-hidden">
+              <img
+                src="/gallery/qris-sample.jpg"
+                alt="QRIS"
+                className="w-full max-w-xs mx-auto"
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "transfer" && (
+          <div className="space-y-3 animate-fadeIn">
+            <div className="border rounded-xl p-3 flex justify-between items-center">
+              <div>
+                <p className="font-semibold">BCA</p>
+                <p className="text-sm text-neutral-500">a/n Galih</p>
+                <p className="font-mono text-lg">1234567890</p>
               </div>
-            ))}
+              <button
+                onClick={() => handleCopy("1234567890")}
+                className="bg-black text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1"
+              >
+                <Copy className="w-4 h-4" /> Salin
+              </button>
+            </div>
+
+            <div className="border rounded-xl p-3 flex justify-between items-center">
+              <div>
+                <p className="font-semibold">Mandiri</p>
+                <p className="text-sm text-neutral-500">a/n Dian</p>
+                <p className="font-mono text-lg">9876543210</p>
+              </div>
+              <button
+                onClick={() => handleCopy("9876543210")}
+                className="bg-black text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1"
+              >
+                <Copy className="w-4 h-4" /> Salin
+              </button>
+            </div>
           </div>
-          <div className="mt-6 p-4 rounded-xl border text-sm text-neutral-700 bg-neutral-100">
-            <p className="font-medium mb-1">Alamat Pengiriman Barang:</p>
-            <p>{GIFT_ADDRESS}</p>
+        )}
+
+        {activeTab === "hadiah" && (
+          <div className="space-y-2 animate-fadeIn">
+            <p className="text-neutral-600">
+              Kirim hadiah fisik ke alamat berikut:
+            </p>
+            <div className="border rounded-xl p-3 text-sm text-neutral-800 leading-relaxed">
+              Jl. Contoh Alamat Pengantin No. 123, Jakarta Selatan, Indonesia
+            </div>
+            <button
+              onClick={() =>
+                handleCopy(
+                  "Jl. Contoh Alamat Pengantin No. 123, Jakarta Selatan, Indonesia"
+                )
+              }
+              className="bg-black text-white px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-1 w-full"
+            >
+              <Copy className="w-4 h-4" /> Salin Alamat
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
